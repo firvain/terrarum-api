@@ -8,6 +8,7 @@ const morgan = require("morgan");
 const app = express();
 const port = process.env.PORT || 3000;
 const env = process.env.NODE_ENV;
+const routes = require("./routes");
 app.use(morgan("dev"));
 // parse application/x-www-form-urlencoded
 // parse application/json
@@ -49,4 +50,6 @@ app.get(
     }
   })
 );
+app.use("/api", routes);
+
 app.listen(port, () => console.log(`Listening on port ${port}`));
