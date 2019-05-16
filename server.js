@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const express = require("express");
 require("dotenv-flow").config();
-const MongoClient = require("mongodb").MongoClient;
+
 const compression = require("compression");
 // const { join } = require("path");
 const morgan = require("morgan");
@@ -14,16 +14,8 @@ app.use(morgan("dev"));
 // parse application/json
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const db = async () => {
-  try {
-    const db = await MongoClient.connect(process.env.MONGOLAB_URI, {
-      useNewUrlParser: true
-    });
-    return db;
-  } catch (error) {
-    throw new Error(error);
-  }
-};
+const db = require("./dbs");
+const asyncMiddleware = require("./helpers");
 // MongoClient.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true })
 //   .then(function(db) {
 //     // <- db as first argument
@@ -32,9 +24,6 @@ const db = async () => {
 //   .catch(function(err) {
 //     console.log(err);
 //   });
-const asyncMiddleware = fn => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
 app.use(compression());
 app.get("/", (req, res) => res.send(env));
 app.get(
