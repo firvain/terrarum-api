@@ -4,7 +4,7 @@ const db = async () => {
     const db = await MongoClient.connect(process.env.MONGOLAB_URI, {
       useNewUrlParser: true
     });
-    return db;
+    return db.db();
   } catch (error) {
     throw new Error(error);
   }

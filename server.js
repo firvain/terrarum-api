@@ -14,8 +14,8 @@ app.use(morgan("dev"));
 // parse application/json
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const db = require("./dbs");
-const asyncMiddleware = require("./helpers");
+const dbs = require("./dbs");
+// const asyncMiddleware = require("./helpers");
 // MongoClient.connect(process.env.MONGOLAB_URI, { useNewUrlParser: true })
 //   .then(function(db) {
 //     // <- db as first argument
@@ -26,19 +26,23 @@ const asyncMiddleware = require("./helpers");
 //   });
 app.use(compression());
 app.get("/", (req, res) => res.send(env));
-app.get(
-  "/create",
-  asyncMiddleware(async (req, res) => {
-    try {
-      await db();
-
-      res.send("connected");
-    } catch (error) {
-      console.log(error.message);
+async function initDB() {
+  try {
+    const db = await dbs();
+    db.dropCollection("test");
+    app.use("/api", routes(db));
+    app.get("/api", (req, res) => {
+      res.send("connected to database");
+    });
+  } catch (error) {
+    app.get("/api", (req, res) => {
       res.send(error.message);
-    }
-  })
-);
-app.use("/api", routes);
-
-app.listen(port, () => console.log(`Listening on port ${port}`));
+    });
+    throw new Error(error.message);
+  }
+}
+initDB()
+  .then(app.listen(port, () => console.log(`Listening on port ${port}`)))
+  .catch(error => {
+    console.error(error.message);
+  });
